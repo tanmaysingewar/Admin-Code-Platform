@@ -129,7 +129,7 @@ export default function FacultyLabCard({
           <Button
             style={{
               marginLeft: "5px",
-              backgroundColor: "#FF0800",
+              backgroundColor: "#f94449",
               borderRadius: "50px",
               color: "#fff",
             }}
