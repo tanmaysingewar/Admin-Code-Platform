@@ -97,6 +97,23 @@ export default function CreateLab() {
                   { value: "4", label: "VIII" },
                 ]}
               />
+              <Select
+                style={{ marginLeft: "20px" }}
+                withAsterisk
+                label="Section"
+                placeholder="Pick one"
+                error="Select Section"
+                data={[
+                  { value: "a", label: "A" },
+                  { value: "b", label: "B" },
+                  { value: "c", label: "C" },
+                  { value: "d", label: "D" },
+                  { value: "e", label: "E" },
+                  { value: "f", label: "F" },
+                  { value: "g", label: "G" },
+                  { value: "h", label: "H" },
+                ]}
+              />
               </div>
           </div>
         </Box>
