@@ -97,19 +97,6 @@ export default function CreateLab() {
                   { value: "4", label: "VIII" },
                 ]}
               />
-              <Select
-                style={{ marginLeft: "20px" }}
-                withAsterisk
-                label="Current Year"
-                placeholder="Pick one"
-                error="Select Current Year"
-                data={[
-                  { value: "1", label: "First" },
-                  { value: "2 ", label: "Second" },
-                  { value: "3 ", label: "Third" },
-                  { value: "4 ", label: "Final" },
-                ]}
-              />
               </div>
           </div>
         </Box>
