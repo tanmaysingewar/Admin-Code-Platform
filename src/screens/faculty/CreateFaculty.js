@@ -1,8 +1,12 @@
-import { Button, Text, Box, Input, Select, Textarea } from "@mantine/core";
+import { Button, Text, Box, Input, Select, Textarea, Popover, PasswordInput, Progress } from "@mantine/core";
 import Router from "next/router";
 import { DateInput } from "@mantine/dates";
 import Header from "@/Components/Header";
 import BackNav from "@/Components/BackNav";
+import { useState } from "react";
+import { IconX } from "@tabler/icons-react";
+
+
 
 export default function CreateFaculty() {
   return (
@@ -15,9 +19,6 @@ export default function CreateFaculty() {
         <Header
           title={`Create Faculty`}
         />
-        <Text style={{fontSize: "14px" }}>
-          F_ID : 3245
-        </Text>
       </div>
       <div style={{width : "100%"}}>
         <Box padding="xl" style={{width : "650px"}}>
@@ -25,7 +26,7 @@ export default function CreateFaculty() {
             <Input.Wrapper
               id="fName"
               withAsterisk
-              label="Name of the Students"
+              label="Name of the Faculty"
               description="Please enter proper name of faculty this will reflect all over the platform"
               error="Please enter name"
             >
@@ -35,26 +36,6 @@ export default function CreateFaculty() {
                 style={{ width: "500px" }}
               />
             </Input.Wrapper>
-            <div style={{ marginTop: "20px", display: "flex" }}>
-              <DateInput
-                defaultLevel={"year"}
-                mt="md"
-                label={"Date of Birth"}
-                placeholder="Enter your DOB"
-                required
-                style={{ width: "240px" }}
-                error="Enter date"
-              />
-               <DateInput
-                defaultLevel={"year"}
-                mt="md"
-                label={"Joining Date"}
-                placeholder="Enter your Joining Date"
-                required
-                style={{ width: "240px", marginLeft : "20px" }}
-                error="Enter date"
-              />
-            </div>
 
             <div style={{ marginTop: "20px", display: "flex" }}>
               <Input.Wrapper
@@ -71,74 +52,13 @@ export default function CreateFaculty() {
                 />
               </Input.Wrapper>
             </div>
-            <div style={{ marginTop: "20px", display: "flex" }}>
-              <Input.Wrapper
-                id="fName"
-                withAsterisk
-                label="Guardian Contact No"
-                error="Please Enter Contact No"
-              >
-                <Input
-                  type="number"
-                  placeholder="Enter Contact No"
-                  style={{ width: "200px" }}
-                />
-              </Input.Wrapper>
-              <Input.Wrapper
-                id="fName"
-                withAsterisk
-                label="Faculty Contact No"
-                error="Please Enter Contact No"
-                style={{ marginLeft: "20px" }}
-              >
-                <Input
-                  type="number"
-                  label="Faculty Name"
-                  placeholder="Enter Contact No"
-                  style={{ width: "200px" }}
-                />
-              </Input.Wrapper>
-            </div>
-
-            <div style={{ marginTop: "20px", display: "flex" }}>
-              <Select
-                withAsterisk
-                label="Department"
-                placeholder="Pick one"
-                error="Select Department"
-                data={[
-                  { value: "ctec", label: "CTec" },
-                  { value: "entc", label: "ENTC" },
-                  { value: "civil", label: "CIVIL" },
-                  { value: "it", label: "IT" },
-                ]}
-              />
-              <Select
-                style={{ marginLeft: "20px" }}
-                withAsterisk
-                label="Gender"
-                placeholder="Pick one"
-                error="Select Gender"
-                data={[
-                  { value: "m", label: "Male" },
-                  { value: "f ", label: "Female" },
-                  { value: "o ", label: "Other" },
-                ]}
-              />
-            </div>
-            
-            <div style={{ marginTop: "20px" }}>
-              <Textarea
-                placeholder="Address"
-                label="Enter the Address"
-                withAsterisk
-              />
-            </div>
+              <PasswordInputAdvance />
           </div>
         </Box>
-        <div style={{ textAlign: "center", marginTop: "40px", marginBottom : "60px" }}>
+        <div style={{marginTop: "40px", marginBottom : "60px" }}>
+            <Text style={{fontSize : "12px",marginBottom : "10px"}}><b>Note :</b> Email will send to the given Email Id with Password</Text>
           <Button onClick={() => Router.push("/student/profile")}>
-            Conform & Save
+            Create & Save
           </Button>
         </div>
       </div>
@@ -146,3 +66,72 @@ export default function CreateFaculty() {
     </div>
   );
 }
+
+function PasswordRequirement({ meets, label }){
+    return (
+      <Text
+        color={meets ? 'teal' : 'red'}
+        sx={{ display: 'flex', alignItems: 'center' }}
+        mt={7}
+        size="sm"
+      >
+        {meets ? <IconCheck size="0.9rem" /> : <IconX size="0.9rem" />} <Box ml={10}>{label}</Box>
+      </Text>
+    );
+  }
+  
+  const requirements = [
+    { re: /[0-9]/, label: 'Includes number' },
+    { re: /[a-z]/, label: 'Includes lowercase letter' },
+    { re: /[A-Z]/, label: 'Includes uppercase letter' },
+    { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: 'Includes special symbol' },
+  ];
+
+  function getStrength(password) {
+    let multiplier = password.length > 5 ? 0 : 1;
+  
+    requirements.forEach((requirement) => {
+      if (!requirement.re.test(password)) {
+        multiplier += 1;
+      }
+    });
+  
+    return Math.max(100 - (100 / (requirements.length + 1)) * multiplier, 10);
+  }
+
+function PasswordInputAdvance() {
+    const [popoverOpened, setPopoverOpened] = useState(false);
+    const [value, setValue] = useState('');
+    const checks = requirements.map((requirement, index) => (
+      <PasswordRequirement key={index} label={requirement.label} meets={requirement.re.test(value)} />
+    ));
+  
+    const strength = getStrength(value);
+    const color = strength === 100 ? 'teal' : strength > 50 ? 'yellow' : 'red';
+  
+    return (
+      <Box maw={340}  style={{marginTop : "20px"}}>
+        <Popover opened={popoverOpened} position="bottom" width="target" transitionProps={{ transition: 'pop' }}>
+          <Popover.Target>
+            <div
+              onFocusCapture={() => setPopoverOpened(true)}
+              onBlurCapture={() => setPopoverOpened(false)}
+            >
+              <PasswordInput
+                withAsterisk
+                label="Password"
+                placeholder="Your password"
+                value={value}
+                onChange={(event) => setValue(event.currentTarget.value)}
+              />
+            </div>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Progress color={color} value={strength} size={5} mb="xs" />
+            <PasswordRequirement label="Includes at least 6 characters" meets={value.length > 5} />
+            {checks}
+          </Popover.Dropdown>
+        </Popover>
+      </Box>
+    );
+  }
