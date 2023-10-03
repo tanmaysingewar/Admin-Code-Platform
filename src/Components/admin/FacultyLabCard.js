@@ -124,7 +124,21 @@ export default function FacultyLabCard({
             loading={false}
             loaderProps={{ color: "#0368FF" }}
           >
-            Edit Lab
+            Edit
+          </Button>
+          <Button
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "50px",
+              color: "#000",
+              marginLeft: "5px",
+            }}
+            radius={"xl"}
+            onClick={() => Router.push(redirectAnalysis)}
+            loading={false}
+            loaderProps={{ color: "#0368FF" }}
+          >
+            Analysis
           </Button>
           <Button
             style={{
@@ -137,7 +151,7 @@ export default function FacultyLabCard({
             loading={false}
             loaderProps={{ color: "#fff" }}
           >
-            Delete Lab
+            Delete
           </Button>
         </div>
       </div>

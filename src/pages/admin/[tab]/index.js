@@ -67,7 +67,7 @@ export default function landingPage() {
           </div>
           { 
             router.query.tab === "labs" && router.query.create === "lab" ?( <CreateLab /> ) : 
-            router.query.tab === "labs" && router.query.edit === "CPP203" ?( <EditLab /> ) : 
+            router.query.tab === "labs" && router.query.edit ?( <EditLab /> ) : 
             //Labs Tab
             router.query.tab === "labs" && router.query.lab && router.query.edit === "problem" && router.query.problem ?( <EditProblem /> ) : 
             router.query.tab === "labs" && router.query.lab && router.query.edit === "practical" && router.query.practical ?( <EditPractical /> ) : 

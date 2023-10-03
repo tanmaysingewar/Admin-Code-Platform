@@ -31,6 +31,7 @@ export default function FacultyLabs() {
                 }
                 redirectLab={"/admin/labs?edit=CPP203"}
                 // redirectTest={"/faculty/test/CPP203/"}
+                redirectAnalysis={"/admin/labs?lab=cpp&&analysis=true"}
                 BG_color={"#0368FF"}
                 progress={40}
               />
@@ -43,7 +44,7 @@ export default function FacultyLabs() {
                   "Simple and easy to learn the practicals and applied problems."
                 }
                 redirectLab={"/admin/labs?edit=PY204"}
-                redirectAnalysis={"/faculty/labs?lab=Python&&analysis=true"}
+                redirectAnalysis={"/admin/labs?lab=Python&&analysis=true"}
                 BG_color={"#4CAF50"}
                 progress={70}
               />
@@ -54,7 +55,7 @@ export default function FacultyLabs() {
                 title={"Java"}
                 dec={"Introductory course to Java with DSA practice problems "}
                 redirectLab={"/admin/labs?edit=JV232"}
-                redirectAnalysis={"/faculty/labs?lab=java&&analysis=true"}
+                redirectAnalysis={"/admin/labs?lab=java&&analysis=true"}
                 BG_color={"#CF75FF"}
                 progress={20}
               />

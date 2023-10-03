@@ -3,8 +3,14 @@ import Router from "next/router";
 import { DateInput } from "@mantine/dates";
 import Header from "@/Components/Header";
 import BackNav from "@/Components/BackNav";
+import { useState } from "react";
 
 export default function EditLab() {
+  const [facultyOne, setFacultyOne] = useState("")
+  // Faculty Two state
+  const [facultyTwo, setFacultyTwo] = useState("")
+  // Faculty Three state
+  const [facultyThree, setFacultyThree] = useState("")
   return (
     <div style={{height : "100vh", overflowY : "scroll",width : "100%"}}>
       <div style={{ marginTop: "60px" }}>
@@ -54,7 +60,7 @@ export default function EditLab() {
             <Select
                 style={{ width : "200px"}}
                 withAsterisk
-                label="Current Year"
+                label="Academic Year"
                 placeholder="Pick one"
                 error="Select Current Year"
                 data={[
@@ -83,34 +89,70 @@ export default function EditLab() {
             <div style={{ marginTop: "20px", display: "flex" }}>
               <Select
                 withAsterisk
-                label="Current Semester"
+                label="Semester"
                 placeholder="Pick one"
-                error="Select Current Semester"
+                error="Select Semester"
                 data={[
                   { value: "1", label: "I" },
                   { value: "2", label: "II" },
                   { value: "3", label: "III" },
                   { value: "4", label: "IV" },
-                  { value: "4", label: "V" },
-                  { value: "4", label: "VI" },
-                  { value: "4", label: "VII" },
-                  { value: "4", label: "VIII" },
+                  { value: "5", label: "V" },
+                  { value: "6", label: "VI" },
+                  { value: "7", label: "VII" },
+                  { value: "8", label: "VIII" },
                 ]}
               />
               <Select
                 style={{ marginLeft: "20px" }}
                 withAsterisk
-                label="Current Year"
+                label="Section"
                 placeholder="Pick one"
-                error="Select Current Year"
+                error="Select Section"
                 data={[
-                  { value: "1", label: "First" },
-                  { value: "2 ", label: "Second" },
-                  { value: "3 ", label: "Third" },
-                  { value: "4 ", label: "Final" },
+                  { value: "a", label: "A" },
+                  { value: "b", label: "B" },
+                  { value: "c", label: "C" },
+                  { value: "d", label: "D" },
+                  { value: "e", label: "E" },
+                  { value: "f", label: "F" },
+                  { value: "g", label: "G" },
+                  { value: "h", label: "H" },
                 ]}
               />
               </div>
+              <div style={{ marginTop: "20px", display: "flex" }}>
+              <Select
+                label="Select Faculty One"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyOne(value)}
+                searchValue={facultyOne}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+              />
+            </div>
+            <div style={{ marginTop: "20px", display: "flex" }}>
+            <Select
+                label="Select Faculty Two"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyTwo(value)}
+                searchValue={facultyTwo}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+                style={{marginRight : "10px"}}
+              />
+              <Select
+                label="Select Faculty One"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyThree(value)}
+                searchValue={facultyThree}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+              />
+            </div>
           </div>
         </Box>
         <div style={{ marginTop: "40px", marginBottom : "60px" }}>

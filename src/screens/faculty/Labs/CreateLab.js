@@ -3,20 +3,24 @@ import Router from "next/router";
 import { DateInput } from "@mantine/dates";
 import Header from "@/Components/Header";
 import BackNav from "@/Components/BackNav";
+import { useState } from "react";
+
 
 export default function CreateLab() {
+  const [facultyOne, setFacultyOne] = useState("")
+  // Faculty Two state
+  const [facultyTwo, setFacultyTwo] = useState("")
+  // Faculty Three state
+  const [facultyThree, setFacultyThree] = useState("")
+
   return (
-    <div style={{height : "100vh", overflowY : "scroll",width : "100%"}}>
+    <div style={{ height: "100vh", overflowY: "scroll", width: "100%" }}>
       <div style={{ marginTop: "60px" }}>
-      <BackNav
-          dataTrack={[]}
-        />
-        <Header
-          title={`Create Lab`}
-        />
+        <BackNav dataTrack={[]} />
+        <Header title={`Create Lab`} />
       </div>
-      <div style={{width : "100%"}}>
-        <Box padding="xl" style={{width : "650px"}}>
+      <div style={{ width: "100%" }}>
+        <Box padding="xl" style={{ width: "650px" }}>
           <div>
             <Input.Wrapper
               id="fName"
@@ -35,7 +39,7 @@ export default function CreateLab() {
               withAsterisk
               label="ID of the Lab"
               error="Please Lab ID"
-              style={{marginTop : "20px"}}
+              style={{ marginTop: "20px" }}
             >
               <Input
                 label="Faculty Name"
@@ -50,11 +54,11 @@ export default function CreateLab() {
                 withAsterisk
               />
             </div>
-            <div style={{marginTop : "20px",display : "flex"}}>
-            <Select
-                style={{ width : "200px"}}
+            <div style={{ marginTop: "20px", display: "flex" }}>
+              <Select
+                style={{ width: "200px" }}
                 withAsterisk
-                label="Current Year"
+                label="Academic Year"
                 placeholder="Pick one"
                 error="Select Current Year"
                 data={[
@@ -65,7 +69,7 @@ export default function CreateLab() {
                 ]}
               />
               <Select
-                style={{ width : "200px",marginLeft : "20px"}}
+                style={{ width: "200px", marginLeft: "20px" }}
                 withAsterisk
                 label="Branch"
                 placeholder="Pick one"
@@ -78,12 +82,11 @@ export default function CreateLab() {
                   { value: "eee", label: "EEE" },
                 ]}
               />
-
             </div>
             <div style={{ marginTop: "20px", display: "flex" }}>
               <Select
                 withAsterisk
-                label="Current Semester"
+                label="Semester"
                 placeholder="Pick one"
                 error="Select Current Semester"
                 data={[
@@ -114,10 +117,42 @@ export default function CreateLab() {
                   { value: "h", label: "H" },
                 ]}
               />
-              </div>
+            </div>
+            <div style={{ marginTop: "20px", display: "flex" }}>
+              <Select
+                label="Select Faculty One"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyOne(value)}
+                searchValue={facultyOne}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+              />
+            </div>
+            <div style={{ marginTop: "20px", display: "flex" }}>
+            <Select
+                label="Select Faculty Two"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyTwo(value)}
+                searchValue={facultyTwo}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+                style={{marginRight : "10px"}}
+              />
+              <Select
+                label="Select Faculty One"
+                placeholder="Pick one"
+                searchable
+                onSearchChange={(value) => setFacultyThree(value)}
+                searchValue={facultyThree}
+                nothingFound="No options"
+                data={["React", "Angular", "Svelte", "Vue"]}
+              />
+            </div>
           </div>
         </Box>
-        <div style={{ marginTop: "40px", marginBottom : "60px" }}>
+        <div style={{ marginTop: "40px", marginBottom: "60px" }}>
           <Button onClick={() => Router.push("/student/profile")}>
             Conform & Save
           </Button>

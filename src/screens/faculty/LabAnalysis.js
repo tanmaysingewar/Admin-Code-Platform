@@ -184,6 +184,17 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
                 marginBottom: "10px",
               }}
             >
+              Class Roll No.
+            </Text>
+          </th>
+          <th>
+            <Text
+              style={{
+                fontWeight: "800",
+                fontSize: "15px",
+                marginBottom: "10px",
+              }}
+            >
               Date
             </Text>
           </th>
@@ -249,6 +260,11 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
                   22030041
+                </Text>
+              </td>
+              <td style={{ padding: "10px" }}>
+                <Text style={{ fontWeight: "500", fontSize: "15px" }}>
+                  64
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
