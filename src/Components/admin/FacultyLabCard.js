@@ -1,8 +1,11 @@
-import { Text, Button, Box } from "@mantine/core";
+import { Text, Button, Box, Loader,Modal } from "@mantine/core";
 import Router from "next/router";
 import Image from "next/image";
+import { deleteDate, fetchDate } from "@/helper/fetchDate";
+import { useEffect, useState } from "react";
 
 export default function FacultyLabCard({
+  lab,
   logo,
   title,
   dec,
@@ -11,7 +14,43 @@ export default function FacultyLabCard({
   redirectAnalysis,
   BG_color,
 }) {
+
+  const [noOfPracticals, setNoOfPracticals] = useState("NaN")
+  const [noOfStudents, setNoOfStudents] = useState("NaN")
+
+  const [deletePopUp, setDeletePopUp] = useState(false)
+
+  const [loadDeleteBUtton, setLoadDeleteBUtton] = useState(false)
+
+  useEffect(() => {
+    fetchDate(`/count/practicals?l_id=${lab._id}`).then((res) => {
+      if(!res.success) return;
+      setNoOfPracticals(res.response || 0)
+      console.log(res.response)
+    }
+    );
+    fetchDate(`/count/students?l_id=${lab._id}`).then((res) => {
+      if(!res.success) return;
+      setNoOfStudents(res.response || 0)
+      console.log(res.response)
+    }
+    );
+  }, [])
+
+  const onClickDelete = () => {
+    setLoadDeleteBUtton(true)
+    deleteDate(`/delete/lab?l_id=${lab._id}`).then((res) => {
+      if(!res.success) return;
+      Router.reload()
+    })
+  }
+  
   return (
+    <>
+     <Modal opened={deletePopUp} onClose={() => setDeletePopUp(false)} title="Delete Lab">
+        <Text style={{marginBottom : "10px"}}>Are you sure you want to delete this lab?</Text>
+        <Button loading={loadDeleteBUtton} color="red" onClick={() => onClickDelete()}>Delete</Button>
+      </Modal>
     <Box
       style={{
         backgroundColor: BG_color,
@@ -27,14 +66,14 @@ export default function FacultyLabCard({
           <Image src={logo} alt="Norway" height={50} />
           <div style={{ marginLeft: "20px" }}>
             <Text
-              style={{ fontWeight: "700", color: "#fff", fontSize: "20px" }}
+              style={{ fontWeight: "700", color: "#fff", fontSize: "18px" }}
             >
-              {title}
+              {lab.name}
             </Text>
             <Text
               style={{ fontWeight: "400", color: "#fff", fontSize: "12px" }}
             >
-              {courseCode}
+              {lab.l_id}
             </Text>
           </div>
         </div>
@@ -47,7 +86,21 @@ export default function FacultyLabCard({
               paddingLeft: "5px",
             }}
           >
-            {dec}
+            {lab.dec}
+          </Text>
+        </div>
+        <div style={{marginLeft : "5px",marginTop : "5px"}}>
+          <Text style={{ fontWeight: "600", color: "#fff", fontSize: "13px" }}>
+            Faculty Names :
+            {
+              lab.faculties.map((faculty, index) => {
+                return (
+                  <span key={index}>
+                    {" "}{faculty.name}{" "}
+                  </span>
+                );
+              })
+            }
           </Text>
         </div>
         <Box
@@ -77,7 +130,7 @@ export default function FacultyLabCard({
                     fontSize: "12px",
                   }}
                 >
-                  Year : II
+                  Year : {lab.year}
                 </Text>
                 <Text
                   style={{
@@ -86,7 +139,7 @@ export default function FacultyLabCard({
                     fontSize: "12px",
                   }}
                 >
-                  Term : Even 2024
+                  Semester : {lab.sem}
                 </Text>
               </div>
               <div style={{ marginLeft: "20px" }}>
@@ -97,7 +150,7 @@ export default function FacultyLabCard({
                     fontSize: "12px",
                   }}
                 >
-                  Branch : AIDS
+                  Branch : {lab.branch}
                 </Text>
                 <Text
                   style={{
@@ -106,7 +159,7 @@ export default function FacultyLabCard({
                     fontSize: "12px",
                   }}
                 >
-                  Section : A
+                  Section : {lab.section}
                 </Text>
               </div>
             </div>
@@ -120,7 +173,7 @@ export default function FacultyLabCard({
               color: "#000",
             }}
             radius={"xl"}
-            onClick={() => Router.push(redirectLab)}
+            onClick={() => Router.push(`/admin/labs?edit=${lab._id}`)}
             loading={false}
             loaderProps={{ color: "#0368FF" }}
           >
@@ -134,7 +187,7 @@ export default function FacultyLabCard({
               marginLeft: "5px",
             }}
             radius={"xl"}
-            onClick={() => Router.push(redirectAnalysis)}
+            onClick={() => Router.push(`/admin/labs?lab=${lab.name}&analysis=true&lab_id=${lab._id}`)}
             loading={false}
             loaderProps={{ color: "#0368FF" }}
           >
@@ -150,6 +203,7 @@ export default function FacultyLabCard({
             radius={"xl"}
             loading={false}
             loaderProps={{ color: "#fff" }}
+            onClick={() => setDeletePopUp(true)}
           >
             Delete
           </Button>
@@ -175,7 +229,7 @@ export default function FacultyLabCard({
               margin: "auto",
             }}
           >
-            200{" "}
+           {noOfStudents === "NaN" ? <Loader  size="xs"  /> : noOfStudents}
           </Text>
           <Text
             style={{
@@ -210,7 +264,7 @@ export default function FacultyLabCard({
               margin: "auto",
             }}
           >
-            9{" "}
+            {noOfPracticals === "NaN" ? <Loader size="xs" /> : noOfPracticals}
           </Text>
           <Text
             style={{
@@ -227,5 +281,6 @@ export default function FacultyLabCard({
         </Box>
       </div>
     </Box>
+    </>
   );
 }

@@ -3,15 +3,92 @@ import Router from "next/router";
 import { DateInput } from "@mantine/dates";
 import Header from "@/Components/Header";
 import BackNav from "@/Components/BackNav";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { fetchDate, postDate } from "@/helper/fetchDate";
+import { validate } from "@/helper/validate";
+import { useStyleRegistry } from "styled-jsx";
+import { isAuthenticated } from "@/helper/auth";
 
 
 export default function CreateLab() {
-  const [facultyOne, setFacultyOne] = useState("")
-  // Faculty Two state
-  const [facultyTwo, setFacultyTwo] = useState("")
-  // Faculty Three state
-  const [facultyThree, setFacultyThree] = useState("")
+
+  const [loadingButton, setLoadingButton] = useState(false)
+
+  const [searchFaculty, setSearchFaculty] = useState("")
+
+  const auth = isAuthenticated()
+
+  const [value, setValue] = useState({
+    name : "",
+    id : "",
+    description : "",
+    year : "",
+    branch : "",
+    semester : "",
+    section : "",
+    faculty : "",
+    collage_code : auth?.admin.collage_code,
+  })
+
+  // console.log(value)
+
+  const [errors, setErrors] = useState({
+    name : "",
+    id : "",
+    description : "",
+    year : "",
+    branch : "",
+    semester : "",
+    section : "",
+    faculty : "",
+  })
+
+  const [mainError, setMainError] = useState("")
+
+const [facultySearchRes, setFacultySearchRes] = useState([])
+
+
+  const handleChange = (name) => (event) => {
+    setValue({...value, [name] : event?.target?.value})
+    setErrors({...errors, [name] : ""})
+  }
+
+  const handleSelectChange = (name) => (event) => {
+    setValue({...value, [name] : event})
+    setErrors({...errors, [name] : ""})
+  }
+
+  const handleSearchChange = (name) => (event) => {
+    setSearchFaculty(event?.target?.value)
+  }
+
+
+  const onClickCreate = () => {
+    setLoadingButton(true)
+    if(validate(value,setErrors)) return setLoadingButton(false);
+
+    postDate("/create/lab",value).then((res) => {
+      setLoadingButton(false)
+      if(!res.success) return setMainError("Something went wrong or Lab ID already exist");
+      console.log(res.response)
+      Router.push("/admin/labs")
+     
+    }
+    );
+  }
+
+  const onClickSearch = async () => {
+
+    if(!searchFaculty) return setFacultySearchRes([])
+
+    await fetchDate(`/get/faculty?search=${searchFaculty}&limit=10&skip=0`)
+    .then((res) => {
+      if(!res.success) return ;
+      console.log(res.response)
+      setFacultySearchRes(res?.response)
+    }
+    );
+  }
 
   return (
     <div style={{ height: "100vh", overflowY: "scroll", width: "100%" }}>
@@ -26,25 +103,25 @@ export default function CreateLab() {
               id="fName"
               withAsterisk
               label="Name of the Lab"
-              error="Please enter name"
+              error={errors.name}
             >
               <Input
-                label="Faculty Name"
                 placeholder="Enter Lab Name"
                 style={{ width: "500px" }}
+                onChange={handleChange("name")}
               />
             </Input.Wrapper>
             <Input.Wrapper
               id="fName"
               withAsterisk
               label="ID of the Lab"
-              error="Please Lab ID"
+              error={errors.id}
               style={{ marginTop: "20px" }}
             >
               <Input
-                label="Faculty Name"
                 placeholder="Enter Faculty Name"
                 style={{ width: "500px" }}
+                onChange={handleChange("id")}
               />
             </Input.Wrapper>
             <div style={{ marginTop: "20px" }}>
@@ -52,6 +129,8 @@ export default function CreateLab() {
                 placeholder="Description of the Lab"
                 label="Description"
                 withAsterisk
+                error={errors.description}
+                onChange={handleChange("description")}
               />
             </div>
             <div style={{ marginTop: "20px", display: "flex" }}>
@@ -60,12 +139,13 @@ export default function CreateLab() {
                 withAsterisk
                 label="Academic Year"
                 placeholder="Pick one"
-                error="Select Current Year"
+                error={errors.year}
+                onChange={handleSelectChange("year")}
                 data={[
-                  { value: "1", label: "First" },
-                  { value: "2 ", label: "Second" },
-                  { value: "3 ", label: "Third" },
-                  { value: "4 ", label: "Final" },
+                  { value: "I", label: "I" },
+                  { value: "II", label: "II" },
+                  { value: "III", label: "III" },
+                  { value: "IV", label: "IV" },
                 ]}
               />
               <Select
@@ -73,13 +153,14 @@ export default function CreateLab() {
                 withAsterisk
                 label="Branch"
                 placeholder="Pick one"
-                error="Select Branch"
+                error={errors.branch}
+                onChange={handleSelectChange("branch")}
                 data={[
-                  { value: "ctec", label: "CTec" },
-                  { value: "aids", label: "AIDS" },
-                  { value: "cse", label: "CSE" },
-                  { value: "ece", label: "ECE" },
-                  { value: "eee", label: "EEE" },
+                  { value: "CTec", label: "CTec" },
+                  { value: "AIDS", label: "AIDS" },
+                  { value: "CSE", label: "CSE" },
+                  { value: "ECE", label: "ECE" },
+                  { value: "EEE", label: "EEE" },
                 ]}
               />
             </div>
@@ -88,16 +169,17 @@ export default function CreateLab() {
                 withAsterisk
                 label="Semester"
                 placeholder="Pick one"
-                error="Select Current Semester"
+                error={errors.semester}
+                onChange={handleSelectChange("semester")}
                 data={[
-                  { value: "1", label: "I" },
-                  { value: "2", label: "II" },
-                  { value: "3", label: "III" },
-                  { value: "4", label: "IV" },
-                  { value: "4", label: "V" },
-                  { value: "4", label: "VI" },
-                  { value: "4", label: "VII" },
-                  { value: "4", label: "VIII" },
+                  { value: "I", label: "I" },
+                  { value: "II", label: "II" },
+                  { value: "III", label: "III" },
+                  { value: "IV", label: "IV" },
+                  { value: "V", label: "V" },
+                  { value: "VI", label: "VI" },
+                  { value: "VII", label: "VII" },
+                  { value: "VIII", label: "VIII" },
                 ]}
               />
               <Select
@@ -105,57 +187,46 @@ export default function CreateLab() {
                 withAsterisk
                 label="Section"
                 placeholder="Pick one"
-                error="Select Section"
+                error={errors.section}
+                onChange={handleSelectChange("section")}
                 data={[
-                  { value: "a", label: "A" },
-                  { value: "b", label: "B" },
-                  { value: "c", label: "C" },
-                  { value: "d", label: "D" },
-                  { value: "e", label: "E" },
-                  { value: "f", label: "F" },
-                  { value: "g", label: "G" },
-                  { value: "h", label: "H" },
+                  { value: "A", label: "A" },
+                  { value: "B", label: "B" },
+                  { value: "C", label: "C" },
+                  { value: "D", label: "D" },
+                  { value: "E", label: "E" },
+                  { value: "F", label: "F" },
+                  { value: "G", label: "G" },
+                  { value: "H", label: "H" },
                 ]}
               />
             </div>
             <div style={{ marginTop: "20px", display: "flex" }}>
-              <Select
-                label="Select Faculty One"
-                placeholder="Pick one"
-                searchable
-                onSearchChange={(value) => setFacultyOne(value)}
-                searchValue={facultyOne}
-                nothingFound="No options"
-                data={["React", "Angular", "Svelte", "Vue"]}
-              />
+              <Input style={{ width: "200px" }} label="Faculty One" placeholder="Search Faculty" onChange={handleSearchChange()} error={errors.faculty} />
+              <Button style={{marginLeft : "10px"}} onClick={() => onClickSearch()}>Search</Button>
             </div>
-            <div style={{ marginTop: "20px", display: "flex" }}>
-            <Select
-                label="Select Faculty Two"
-                placeholder="Pick one"
-                searchable
-                onSearchChange={(value) => setFacultyTwo(value)}
-                searchValue={facultyTwo}
-                nothingFound="No options"
-                data={["React", "Angular", "Svelte", "Vue"]}
-                style={{marginRight : "10px"}}
-              />
-              <Select
-                label="Select Faculty One"
-                placeholder="Pick one"
-                searchable
-                onSearchChange={(value) => setFacultyThree(value)}
-                searchValue={facultyThree}
-                nothingFound="No options"
-                data={["React", "Angular", "Svelte", "Vue"]}
-              />
+            <div>
+                {/* Loop througn the facultySearchRes and display the res  */}
+                {
+                  facultySearchRes.map((faculty,index) => {
+                    return (
+                      <div key={index} style={{display : "flex",justifyContent : "space-between",marginTop : "10px",width : "400px"}}>
+                        <Text style={{margin : "auto 0 auto 0"}}>{index + 1}{". "}{faculty.name}</Text>
+                        <Button size="xs" style={{backgroundColor : "#0368FF"}} onClick={() => setValue({...value, "faculty" : faculty._id})}>Add</Button>
+                      </div>
+                    )
+                  }
+                  )
+                }
             </div>
           </div>
         </Box>
         <div style={{ marginTop: "40px", marginBottom: "60px" }}>
-          <Button onClick={() => Router.push("/student/profile")}>
+        <Text style={{fontSize : "14px",color : "#e03130",marginTop : "10px",marginBottom : "10px"}}>{mainError}</Text>
+          <Button loading={loadingButton} onClick={() => onClickCreate() }>
             Conform & Save
           </Button>
+          
         </div>
       </div>
     </div>

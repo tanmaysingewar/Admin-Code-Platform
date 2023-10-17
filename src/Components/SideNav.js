@@ -10,6 +10,11 @@ export default function SideNav({ NavData}) {
 
   const { navIndex, setNavIndex} = useContext(NavSelect);
 
+  const onLogout = () => {
+    localStorage.removeItem("auth");
+    router.push("/auth/login");
+  }
+
   return (
     <>
       {NavData.data.map((item, index) => (
@@ -41,7 +46,7 @@ export default function SideNav({ NavData}) {
             marginTop: "20px",
             width: "240px",
           }}
-          onClick={() => router.push("/auth/login")}
+          onClick={() => onLogout()}
         >
           Log Out
         </Button>

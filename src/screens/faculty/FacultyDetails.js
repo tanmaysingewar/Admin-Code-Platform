@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 // import {} from "@tabler/icons-react";
 import Header from "@/Components/Header";
 import {
@@ -16,20 +16,38 @@ import {
 } from "@mantine/core";
 import { IconMailFilled, IconPhoneCall } from "@tabler/icons-react";
 import Router from "next/router";
+import { fetchDate } from "@/helper/fetchDate";
+import { LoaderContext } from "@/Components/admin/Context";
+
 
 export default function FacultyDetails() {
   const [openModel, setOpenModel] = useState(false);
+
+  const [loadingButton, setLoadingButton] = useState(false);
+
+  const  {visible, setVisible} = useContext(LoaderContext);
+
+
+  const [mainError, setMainError] = useState("");
+
+
+  const [facultyArray, setFacultyArray] = useState([])
+
+  useEffect(() => {
+    setVisible(true);
+    fetchDate("/all/faculty").then((res) => {
+      console.log(res);
+      setVisible(false);
+      if (!res.success) return setMainError(res?.error || "Something went wrong");
+      setFacultyArray(res.response)
+    }
+    )
+  }, [])
+  
+
   return (
     <>
-      <Modal
-        opened={openModel}
-        onClose={() => setOpenModel(false)}
-        centered
-        withCloseButton={false}
-        scrollAreaComponent={ScrollArea.Autosize}
-      >
-        <MoreDetails />
-      </Modal>
+      
       <div style={{ overflowY: "scroll", height: "100vh", width: "100%" }}>
         <div style={{ marginTop: "50px", width: "95%" }}>
           <Header
@@ -67,7 +85,7 @@ export default function FacultyDetails() {
             </div>
           </div>
           <div>
-            <SingleStudentsAnalysis setOpenModel={setOpenModel} />
+            <SingleStudentsAnalysis openModel={openModel} setOpenModel={setOpenModel} facultyArray={facultyArray} />
           </div>
           <div
             style={{
@@ -87,7 +105,7 @@ export default function FacultyDetails() {
   );
 }
 
-const SingleStudentsAnalysis = ({ setOpenModel }) => {
+const SingleStudentsAnalysis = ({ setOpenModel,facultyArray,openModel }) => {
   return (
     <>
       <table
@@ -166,8 +184,18 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
           </th>
         </tr>
 
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, index) => {
+        {facultyArray.map((item, index) => {
           return (
+            <>
+            <Modal
+        opened={openModel}
+        onClose={() => setOpenModel(false)}
+        centered
+        withCloseButton={false}
+        scrollAreaComponent={ScrollArea.Autosize}
+      >
+        <MoreDetails item={item}  />
+      </Modal>
             <tr
               style={{
                 textAlign: "center",
@@ -176,29 +204,30 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
             >
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  Lorem Ipsum
+                  {item.name}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  CT2031
+                  {item.f_id}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
-                <Text style={{ fontWeight: "500", fontSize: "15px" }}>CTec</Text>
+                <Text style={{ fontWeight: "500", fontSize: "15px" }}>{item.department || "Not Updated"}</Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  loremipsum@gmail.com
+                  {item.email}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
-                <Text style={{ fontWeight: "500", fontSize: "15px" }}>Male</Text>
+                <Text style={{ fontWeight: "500", fontSize: "15px" }}>{item.gender || "Not Updated"}</Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Button onClick={() => setOpenModel(true)}>More</Button>
               </td>
             </tr>
+            </>
           );
         })}
       </table>
@@ -206,7 +235,7 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
   );
 };
 
-const MoreDetails = () => {
+const MoreDetails = ({item}) => {
   return (
     <>
       {/* Modal content */}
@@ -219,7 +248,7 @@ const MoreDetails = () => {
               radius="xl"
               style={{ margin: "auto" }}
             >
-              MK
+              {item.name.split(" ")[0][0] + item.name.split(" ")[1][0]}
             </Avatar>
             <Text
               style={{

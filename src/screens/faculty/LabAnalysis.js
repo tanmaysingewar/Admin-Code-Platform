@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-// import {} from "@tabler/icons-react";
+import React, { useContext, useEffect, useState } from "react";
 import BackNav from "@/Components/BackNav";
 import Header from "@/Components/Header";
 import {
   Button,
-  useMantineColorScheme,
   Input,
   Select,
   Text,
@@ -12,54 +10,127 @@ import {
   Modal,
   Title,
   ScrollArea,
-  ActionIcon
+  ActionIcon,
+  Loader,
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
+import { fetchDate } from "@/helper/fetchDate";
+import { useRouter } from "next/router";
+import { LoaderContext } from "@/Components/admin/Context";
+
 
 export default function LabAnalysis() {
   const [openModel, setOpenModel] = useState(false);
+  const router = useRouter();
+
+  const { visible, setVisible } = useContext(LoaderContext);
+
+  const [recordLoading, setRecordLoading] = useState(false);
+
+  const [selectPractical, setSelectPractical] = useState("");
+
+  const [values, setValues] = useState([]);
+
+  const [statusValue, setStatusValue] = useState({
+    totalAttemptedStudents: 0,
+    successfullyExecuted: 0,
+    failed: 0,
+    partially: 0,
+    terminated: 0,
+    totalStudents: 0,
+  });
+
+  const [practicalList, setPracticalList] = useState([]);
+  useEffect(() => {
+    setVisible(true);
+    fetchDate(`/practical/list?lab_id=${router.query.lab_id}`).then(
+      (res) => {
+        if (!res.success) return setVisible(false);
+        console.log(res.response);
+        //  { value: "pr_3", label: "Practical 3 : If & Else Statement" },
+        setPracticalList(
+          res.response.map((item) => {
+            return { value: item._id, label: item.name };
+          })
+        );
+      }
+    );
+    fetchDate(`/analysis/status?lab_id=${router.query.lab_id}`).then(
+      (res) => {
+        if (!res.success) return setVisible(false);
+        console.log(res.response);
+        setStatusValue({
+          totalAttemptedStudents: res.response.totalAttemptedStudents,
+          successfullyExecuted: res.response.successfullyExecuted,
+          failed: res.response.failed,
+          partially: res.response.partially,
+          terminated: res.response.terminated,
+        });
+      }
+    );
+    fetchDate(`/analysis/practical?lab_id=${router.query.lab_id}`).then(
+      (res) => {
+        console.log(res);
+        if (!res.success) return setVisible(false);
+        setValues(res.response);
+      }
+    );
+    fetchDate(`/count/students?l_id=${router.query.lab_id}`).then(
+      (res) => {
+        if (!res.success) return setVisible(false);
+        setStatusValue((prev) => {
+          return {
+            ...prev,
+            totalStudents: res.response,
+          };
+        });
+        setVisible(false);
+        console.log(res.response);
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!selectPractical) return;
+    setRecordLoading(true);
+    fetchDate(
+      `/analysis/practical?lab_id=${router.query.lab_id}&practical_id=${selectPractical}`
+    ).then((res) => {
+      console.log(res);
+      if (!res.success) return setVisible(false);
+      setValues(res.response);
+      setRecordLoading(false);
+    });
+  }, [selectPractical]);
+
+  const onClickSearch = () => {
+    setRecordLoading(true);
+    fetchDate(`/analysis/search?lab_id=${router.query.lab_id}&search=${search}`).then((res) => {
+      console.log(res);
+      if (!res.success) return setVisible(false);
+      setValues(res.response);
+      setRecordLoading(false);
+    }
+    );
+  }
+
+  const [search, setSearch] = useState("");
+  console.log(search)
+
+  // handle search input change
+  const onChangeSearch = (e) => {
+    const search = e.target.value;
+    setSearch(search);
+  };
+
   return (
     <>
-      <Modal
-        opened={openModel}
-        onClose={() => setOpenModel(false)}
-        centered
-        withCloseButton={false}
-        scrollAreaComponent={ScrollArea.Autosize}
-      >
-        <div style={{ padding: "10px" }}>
-          <Title style={{ textAlign: "left", fontSize: "20px",marginBottom : "10px" }}>
-            Submitted Code
-          </Title>
-          <Prism language="cpp">
-            {`#include <iostream>
-using namespace std;
-
-int main() {
-  int x = 20;
-  int y = 18;
-  if (x > y) {
-    cout << "x is greater than y";
-  }  
-  return 0;
-}
-`}
-          </Prism>
-          <ActionIcon
-                    variant="filled"
-                    color="green"
-                    style={{ width: "40px",marginTop : "10px" }}
-                  >
-                    <IconPlayerPlayFilled size="1rem" />
-                  </ActionIcon>
-        </div>
-      </Modal>
       <div style={{ overflowY: "scroll", height: "100vh", width: "100%" }}>
         <div style={{ marginTop: "60px", width: "95%" }}>
           <BackNav dataTrack={[]} />
           <Header
-            title="Lab Analysis : C++"
+            title={`Lab Analysis : ${router.query.lab}`}
             dec={"Setting of the this portal reflected all over the platform"}
           />
           <div style={{ width: "100%", display: "flex" }}>
@@ -76,54 +147,35 @@ int main() {
                   width: "500px",
                   marginRight: "10px",
                 }}
+                onChange={onChangeSearch}
+                value={search}
               />
-              <Button style={{ marginRight: "20px" }}>Search</Button>
+              <Button style={{ marginRight: "20px" }} onClick={() => onClickSearch()}>Search</Button>
               <Select
                 withAsterisk
                 // value="pr_1"
                 placeholder="Select Practical"
-                // error="Select Department"
-                data={[
-                  { value: "pr_1", label: "Practical 1 : Hello World" },
-                  {
-                    value: "pr_2",
-                    label: "Practical 2 : Variables decelerations",
-                  },
-                  { value: "pr_3", label: "Practical 3 : If & Else Statement" },
-                  { value: "pr_4", label: "Practical 4 : Declaring Functions" },
-                  { value: "pr_5", label: "Practical 5 : Loops" },
-                  { value: "pr_6", label: "Practical 6 : Arrays" },
-                  { value: "pr_7", label: "Practical 7" },
-                  { value: "pr_8", label: "Practical 8" },
-                  { value: "pr_9", label: "Practical 9" },
-                  { value: "pr_10", label: "Practical 10" },
-                ]}
-              />
-              <Select
-                withAsterisk
-                // value="all"
-                placeholder="Select Problem"
-                style={{ marginLeft: "20px" }}
-                // error="Select Department"
-                data={[
-                  { value: "all", label: "All" },
-                  { value: "p_1", label: "Problem 1" },
-                  { value: "p_2", label: "Problem 2" },
-                  { value: "p_3", label: "Problem 3" },
-                  { value: "p_4", label: "Problem 4" },
-                  { value: "p_5", label: "Problem 5" },
-                  { value: "p_6", label: "Problem 6" },
-                  { value: "p_7", label: "Problem 7" },
-                  { value: "p_8", label: "Problem 8" },
-                  { value: "p_9", label: "Problem 9" },
-                  { value: "p_10", label: "Problem 10" },
-                ]}
+                data={practicalList}
+                value={selectPractical}
+                onChange={(e) => setSelectPractical(e)}
               />
             </div>
           </div>
           <div>
-            <Analysis />
-            <SingleStudentsAnalysis setOpenModel={setOpenModel} />
+            <Analysis statusValue={statusValue} />
+            {recordLoading ? (
+              <Loader  style={{ margin: "auto",width : "100%", marginTop : "60px"}} />
+            ) : (
+              values.length === 0 ?
+              <Text style={{ fontWeight: "500", fontSize: "15px",textAlign : "center",width : "100%",marginTop : "60px"}}>
+              No Record Found
+            </Text>
+              :
+              <SingleStudentsAnalysis
+                setOpenModel={setOpenModel}
+                values={values}
+              />
+            )}
           </div>
           <div
             style={{
@@ -133,9 +185,9 @@ int main() {
               margin: "20px",
             }}
           >
-            <Button style={{ margin: "auto", textAlign: "center" }}>
+            {/* <Button style={{ margin: "auto", textAlign: "center" }}>
               Load More
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
@@ -143,9 +195,40 @@ int main() {
   );
 }
 
-const SingleStudentsAnalysis = ({ setOpenModel }) => {
+const SingleStudentsAnalysis = ({ values }) => {
+  const [subIndex, setSubIndex] = useState(0);
+  const [openModel, setOpenModel] = useState(false);
   return (
     <>
+      <Modal
+        opened={openModel}
+        onClose={() => setOpenModel(false)}
+        centered
+        withCloseButton={false}
+        scrollAreaComponent={ScrollArea.Autosize}
+      >
+        <div style={{ padding: "10px" }}>
+          <Title
+            style={{
+              textAlign: "left",
+              fontSize: "20px",
+              marginBottom: "10px",
+            }}
+          >
+            Submitted Code
+          </Title>
+          <Prism language="cpp">
+            {values[subIndex]?.submissions || "// No Code Submitted"}
+          </Prism>
+          <ActionIcon
+            variant="filled"
+            color="green"
+            style={{ width: "40px", marginTop: "10px" }}
+          >
+            <IconPlayerPlayFilled size="1rem" />
+          </ActionIcon>
+        </div>
+      </Modal>
       <table
         style={{
           borderCollapse: "separate",
@@ -239,12 +322,23 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
                 marginBottom: "10px",
               }}
             >
-              View Submissions
+              Code
+            </Text>
+          </th>
+          <th>
+            <Text
+              style={{
+                fontWeight: "800",
+                fontSize: "15px",
+                marginBottom: "10px",
+              }}
+            >
+              Reset
             </Text>
           </th>
         </tr>
 
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, index) => {
+        { values.map((item, index) => {
           return (
             <tr
               style={{
@@ -254,38 +348,80 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
             >
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  Lorem Ipsum
+                  {item.s_id.name}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  22030041
+                  {item.s_id.regNo}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  64
+                  {item.s_id.rollNo}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  12 Dec 2023
+                  {new Date(parseInt(item.date)).toDateString()}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
                 <Text style={{ fontWeight: "500", fontSize: "15px" }}>
-                  24:45:04
+                  {new Date(parseInt(item.time)).toLocaleString("en-US", {
+                    hour: "numeric",
+                    minute: "numeric",
+                    second: "numeric",
+                    hour12: true, // Use 12-hour format
+                  })}
                 </Text>
               </td>
               <td style={{ padding: "10px" }}>
-                <Badge color="green">Executed</Badge>
+                {
+                  <Badge
+                    color={
+                      item.status === -1
+                        ? "blue"
+                        : item.status === 0
+                        ? "red"
+                        : item.status === 1
+                        ? "orange"
+                        : item.status === 2
+                        ? "yellow"
+                        : "green"
+                    }
+                  >
+                    {item.status === -1
+                      ? "Terminated"
+                      : item.status === 0
+                      ? "Failed"
+                      : item.status === 1
+                      ? "Error"
+                      : item.status === 2
+                      ? "Partially"
+                      : "Executed"}
+                  </Badge>
+                }
               </td>
               <td style={{ padding: "10px" }}>
-                <Text style={{ fontWeight: "500", fontSize: "15px" }}>25</Text>
+                <Text style={{ fontWeight: "500", fontSize: "15px" }}>
+                  {item.tc_pass}
+                </Text>
               </td>
               <td style={{ padding: "10px" }}>
-                <Button onClick={() => setOpenModel(true)}>
-                  View Submissions
+                <Button
+                  color="green"
+                  onClick={() => (setOpenModel(true), setSubIndex(index))}
+                >
+                  Code
+                </Button>
+              </td>
+              <td style={{ padding: "10px" }}>
+                <Button
+                  color="orange"
+                  onClick={() => (setOpenModel(true), setSubIndex(index))}
+                >
+                  Reset
                 </Button>
               </td>
             </tr>
@@ -296,7 +432,7 @@ const SingleStudentsAnalysis = ({ setOpenModel }) => {
   );
 };
 
-const Analysis = () => {
+const Analysis = ({ statusValue }) => {
   return (
     <>
       <div
@@ -319,33 +455,48 @@ const Analysis = () => {
               marginBottom: "5px",
             }}
           >
-            Lab Analysis
+            Students
           </Text>
-          <div>
-            <Badge color="white"> Total Students : 50</Badge>
+          <Badge>Total Students : {statusValue.totalStudents}</Badge>
+          <div style={{ marginBottom: "20px" }}>
+            <Badge color="green">
+              Attempted : {statusValue.totalAttemptedStudents}
+            </Badge>
+
+            <Badge style={{ marginLeft: "10px" }} color="orange">
+              Not Attempted :{" "}
+              {statusValue.totalStudents - statusValue.totalAttemptedStudents}
+            </Badge>
           </div>
+
           <Text
             style={{
               fontWeight: "800",
               fontSize: "15px",
               marginBottom: "5px",
-              marginTop: "10px",
             }}
           >
-            Executions
+            Lab Analysis
+            {/* 
+            totalAttemptedStudents : 0,
+    successfullyExecuted : 0,
+    failed : 0,
+    partially : 0,
+    terminated : 0, */}
           </Text>
           <div>
-            <Badge color="green">Successfully : 24</Badge>
+            <Badge color="green">
+              Successfully : {statusValue.successfullyExecuted}
+            </Badge>
             <Badge style={{ marginLeft: "10px" }} color="red">
-              Failed : 24
+              Failed : {statusValue.failed}
             </Badge>
           </div>
           <div style={{ marginTop: "5px" }}>
-            <Badge color="yellow">Partially : 24</Badge>
-            <Badge style={{ marginLeft: "10px" }} color="white">
-              Not Executed : 24
-            </Badge>
+            <Badge color="yellow">Partially : {statusValue.partially}</Badge>{" "}
+            <Badge color="blue">Terminated : {statusValue.terminated}</Badge>
           </div>
+          <div style={{ marginTop: "5px" }}></div>
         </div>
       </div>
     </>
