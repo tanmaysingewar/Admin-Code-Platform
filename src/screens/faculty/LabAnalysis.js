@@ -15,10 +15,9 @@ import {
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
-import { fetchDate } from "@/helper/fetchDate";
+import { deleteDate, fetchDate } from "@/helper/fetchDate";
 import { useRouter } from "next/router";
 import { LoaderContext } from "@/Components/admin/Context";
-
 
 export default function LabAnalysis() {
   const [openModel, setOpenModel] = useState(false);
@@ -31,6 +30,9 @@ export default function LabAnalysis() {
   const [selectPractical, setSelectPractical] = useState("");
 
   const [values, setValues] = useState([]);
+  console.log(values)
+
+  const [resetLoaderButton, setResetLoaderButton] = useState(false)
 
   const [statusValue, setStatusValue] = useState({
     totalAttemptedStudents: 0,
@@ -104,6 +106,15 @@ export default function LabAnalysis() {
     });
   }, [selectPractical]);
 
+  const [search, setSearch] = useState("");
+  console.log(search)
+
+  // handle search input change
+  const onChangeSearch = (e) => {
+    const search = e.target.value;
+    setSearch(search);
+  };
+
   const onClickSearch = () => {
     setRecordLoading(true);
     fetchDate(`/analysis/search?lab_id=${router.query.lab_id}&search=${search}`).then((res) => {
@@ -115,14 +126,20 @@ export default function LabAnalysis() {
     );
   }
 
-  const [search, setSearch] = useState("");
-  console.log(search)
+  const onClickReset = (id) => {
+    setResetLoaderButton(true)
+    deleteDate(`/reset/record?record_id=${id}`)
+    .then(res => {
+      if(!res?.success) return (setVisible(false),setResetLoaderButton(false));
+      // remove that record from the values
+      setValues(prev => {
+        return prev.filter(item => item._id !== id)
+      }) 
+      setResetLoaderButton(false)
+    }
+    )
 
-  // handle search input change
-  const onChangeSearch = (e) => {
-    const search = e.target.value;
-    setSearch(search);
-  };
+  }
 
   return (
     <>
@@ -174,6 +191,8 @@ export default function LabAnalysis() {
               <SingleStudentsAnalysis
                 setOpenModel={setOpenModel}
                 values={values}
+                onClickReset={onClickReset}
+                resetLoaderButton={resetLoaderButton}
               />
             )}
           </div>
@@ -195,9 +214,10 @@ export default function LabAnalysis() {
   );
 }
 
-const SingleStudentsAnalysis = ({ values }) => {
-  const [subIndex, setSubIndex] = useState(0);
+const SingleStudentsAnalysis = ({ values,onClickReset,resetLoaderButton }) => {
+  const [submission, setSubmission] = useState("// no code provided");
   const [openModel, setOpenModel] = useState(false);
+
   return (
     <>
       <Modal
@@ -218,15 +238,15 @@ const SingleStudentsAnalysis = ({ values }) => {
             Submitted Code
           </Title>
           <Prism language="cpp">
-            {values[subIndex]?.submissions || "// No Code Submitted"}
+            {submission}
           </Prism>
-          <ActionIcon
+          {/* <ActionIcon
             variant="filled"
             color="green"
             style={{ width: "40px", marginTop: "10px" }}
           >
             <IconPlayerPlayFilled size="1rem" />
-          </ActionIcon>
+          </ActionIcon> */}
         </div>
       </Modal>
       <table
@@ -411,7 +431,7 @@ const SingleStudentsAnalysis = ({ values }) => {
               <td style={{ padding: "10px" }}>
                 <Button
                   color="green"
-                  onClick={() => (setOpenModel(true), setSubIndex(index))}
+                  onClick={() => (setOpenModel(true), setSubmission(item?.submission ? item?.submission : "// No Code Submitted " ))}
                 >
                   Code
                 </Button>
@@ -419,7 +439,8 @@ const SingleStudentsAnalysis = ({ values }) => {
               <td style={{ padding: "10px" }}>
                 <Button
                   color="orange"
-                  onClick={() => (setOpenModel(true), setSubIndex(index))}
+                  loading={resetLoaderButton}
+                  onClick={() => onClickReset(item._id)}
                 >
                   Reset
                 </Button>
